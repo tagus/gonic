@@ -1,16 +1,11 @@
 # syntax=docker/dockerfile:1
-FROM --platform=$BUILDPLATFORM golang:1.27-alpine3.24 AS builder
-ARG TARGETOS
-ARG TARGETARCH
+FROM golang:1.27-alpine3.24 AS builder
 WORKDIR /src
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN  \
-    --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/ ./cmd/...
+RUN CGO_ENABLED=0 go build -o /out/ ./cmd/...
 
 FROM alpine:3.24
 LABEL org.opencontainers.image.source=https://github.com/sentriz/gonic
